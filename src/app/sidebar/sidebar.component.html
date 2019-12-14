@@ -1,0 +1,12 @@
+<div class="sidebar-background" *ngIf="isOpen" (click)="close()"></div>
+<div class="sidebar-container" [ngClass]="{'sidebar-open': isOpen}">
+  <div class="sidebar">
+    <div class="sidebar-title bg-primary d-flex justify-content-between p-2">
+      <div class="text-light">{{title}}</div>
+      <button class="btn btn-sm btn-primary" (click)="close()">X</button>
+    </div>
+    <div class="sidebar-content p-2">
+      <ng-content></ng-content>
+    </div>
+  </div>
+</div>

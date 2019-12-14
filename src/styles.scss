@@ -1,1 +1,6 @@
-/* You can add global styles to this file, and also import other style files */
+.toast-body {
+  width: 20rem;
+  & .toast-text {
+    margin-right: .5rem;
+  }
+}
