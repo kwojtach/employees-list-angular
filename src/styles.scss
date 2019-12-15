@@ -1,6 +1,52 @@
+@import '../node_modules/bootstrap/scss/functions';
+@import '../node_modules/bootstrap/scss/variables';
+
+$primary: #1B1464;
+$success: #006266;
+$danger: #6F1E51;
+
+$theme-colors: (
+  primary: #1B1464,
+  success: #006266,
+  danger: #6F1E51
+);
+
+@import '../node_modules/bootstrap/scss/bootstrap';
+
 .toast-body {
   width: 20rem;
   & .toast-text {
     margin-right: .5rem;
+  }
+}
+ngb-pagination {
+  & > ul {
+    margin-bottom: 0;
+  }
+  .page-link {
+    color: $primary;
+  }
+  .page-item.active .page-link {
+    background-color: $primary;
+    border-color: $primary;
+  }
+}
+
+.modal-content {
+  .modal-header {
+    padding: .5rem;
+    .modal-title {
+      font-size: 1.25rem;
+    }
+    .close {
+      padding: .5rem;
+      margin: -.5rem -.5rem -.5rem auto;
+    }
+  }
+  .modal-body {
+    padding: .5rem;
+  }
+  .modal-footer {
+    padding: .5rem;
   }
 }

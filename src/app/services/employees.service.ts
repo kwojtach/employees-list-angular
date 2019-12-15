@@ -8,18 +8,18 @@ export class EmployeesService {
 
   getEmployees(pageSize?: number, page?: number) {
     const queryParams = `?pagesize=${pageSize}&page=${page}`;
-    return this.http.get<{employees: [], employeesCount: number}>(`http://localhost:3000/api/employees${queryParams}`);
+    return this.http.get<{employees: [], employeesCount: number}>(`https://employees-list-angular.herokuapp.com/api/employees${queryParams}`);
   }
 
   addEmployee(employee) {
-    return this.http.post<{employee: any, message: string}>('http://localhost:3000/api/employees', employee);
+    return this.http.post<{employee: any, message: string}>('https://employees-list-angular.herokuapp.com/api/employees', employee);
   }
 
   editEmployee(id: number, newEmployee) {
-    return this.http.put<{message: string}>(`http://localhost:3000/api/employees/${id}`, newEmployee);
+    return this.http.put<{message: string}>(`https://employees-list-angular.herokuapp.com/api/employees/${id}`, newEmployee);
   }
 
   deleteEmployee(id: number) {
-    return this.http.delete<{message: string}>(`http://localhost:3000/api/employees/${id}`);
+    return this.http.delete<{message: string}>(`https://employees-list-angular.herokuapp.com/api/employees/${id}`);
   }
 }

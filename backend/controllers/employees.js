@@ -31,16 +31,12 @@ exports.addEmployee = (req, res, next) => {
   });
   employee.save()
     .then(addedEmployee => {
-      console.log(addedEmployee);
       res.status(201).json({
         message: 'Employee added successfully',
         employee: addedEmployee
       });
     })
-    .catch(error => {
-      console.log(error);
-      res.status(500).json({ message: 'Adding employee failed' })
-    });
+    .catch(error => res.status(500).json({ message: 'Adding employee failed' }));
 };
 
 exports.editEmployee = (req, res, next) => {
@@ -53,10 +49,7 @@ exports.editEmployee = (req, res, next) => {
   });
   Employee.updateOne({ _id: req.params.id }, employee)
     .then(response => res.status(200).json({ message: 'Employee edited successfully' }))
-    .catch(error => {
-      console.log(error);
-      res.status(500).json({ message: 'Editing employee failed' })
-    });
+    .catch(error => res.status(500).json({ message: 'Editing employee failed' }));
 };
 
 exports.deleteEmployee = (req, res, next) => {

@@ -1,96 +1,94 @@
 <ng-template appConfirm>
   <app-confirm-modal></app-confirm-modal>
 </ng-template>
+<app-toasts></app-toasts>
 <div class="container">
-  <button type="button" class="btn btn-sm btn-primary" (click)="onStartManageEmployee(false)">
-    dodaj pracownika
-  </button>
+  <div class="employees-container">
 
-  <app-sidebar title="dodawanie pracownika" #manageEmployeeSidebar>
+    <app-sidebar [title]="isEditing ? 'edycja pracownika' : 'dodawanie pracownika'" #manageEmployeeSidebar>
+      <form class="clearfix" [formGroup]="employeeForm" (ngSubmit)="onManageEmployee()">
+        <div class="form-group">
+          <label for="firstname">imię</label>
+          <input class="form-control form-control-sm" type="text" id="firstname" formControlName="firstname">
+          <div class="alert alert-danger small" *ngIf="employeeForm.get('firstname').invalid && isSubmitted">pole wymagane</div>
+        </div>
+        <div class="form-group">
+          <label for="surname">nazwisko</label>
+          <input class="form-control form-control-sm" type="text" id="surname" formControlName="surname">
+          <div class="alert alert-danger small" *ngIf="employeeForm.get('surname').invalid && isSubmitted">pole wymagane</div>
+        </div>
+        <div class="form-group">
+          <label for="email">email</label>
+          <input class="form-control form-control-sm" type="email" id="email" formControlName="email">
+          <div class="alert alert-danger small" *ngIf="employeeForm.get('email').invalid && isSubmitted">proszę podać prawidłowy adres email</div>
+        </div>
+        <div class="form-group">
+          <label for="phone">telefon</label>
+          <input class="form-control form-control-sm" type="text" id="phone" formControlName="phone">
+          <div class="alert alert-danger small" *ngIf="employeeForm.get('phone').invalid && isSubmitted">proszę podać prawidłowy nr telefonu</div>
+        </div>
+        <button type="submit" class="btn btn-sm btn-primary float-right" [disabled]="isManagingEmployeeLoading">{{isEditing ? 'zapisz' : 'dodaj'}}</button>
+      </form>
+    </app-sidebar>
 
-    <form [formGroup]="employeeForm" (ngSubmit)="onManageEmployee()">
-      <div class="row">
-        <div class="col-md-12">
-          <div class="form-group">
-            <label for="firstname">imię</label>
-            <input class="form-control form-control-sm" type="text" id="firstname" formControlName="firstname">
-            <div class="alert alert-danger small" *ngIf="employeeForm.get('firstname').invalid">pole wymagane</div>
-          </div>
+    <div class="d-flex justify-content-between">
+      <h4 class="h5">lista pracowników</h4>
+      <button type="button" class="btn btn-sm btn-primary" (click)="onStartManageEmployee(false)">
+        dodaj pracownika
+      </button>
+    </div>
+    <div class="table-responsive">
+      <div class="spinner-box" *ngIf="isFetchingEmployeesLoading">
+        <div class="spinner-box__absolute">
+          <div class="spinner-border text-primary"></div>
         </div>
       </div>
-      <div class="row">
-        <div class="col-md-12">
-          <div class="form-group">
-            <label for="surname">nazwisko</label>
-            <input class="form-control form-control-sm" type="text" id="surname" formControlName="surname">
-            <div class="alert alert-danger small" *ngIf="employeeForm.get('surname').invalid">pole wymagane</div>
-          </div>
-        </div>
+      <table class="table table-hover table-sm">
+        <thead>
+        <tr>
+          <th>imię</th>
+          <th>nazwisko</th>
+          <th>email</th>
+          <th>telefon</th>
+          <th>akcje</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let employee of employees">
+          <td>{{employee.firstname}}</td>
+          <td>{{employee.surname}}</td>
+          <td>{{employee.email}}</td>
+          <td>{{employee.phone}}</td>
+          <td>
+            <div class="btn-group">
+              <button type="button" class="btn btn-sm btn-outline-primary" (click)="onStartManageEmployee(true, employee)">
+                edytuj
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-danger" (click)="onDeleteEmployee(employee)">
+                usuń
+              </button>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="d-flex justify-content-between align-items-center" *ngIf="employeesCount">
+      <ngb-pagination [collectionSize]="employeesCount" size="sm" (pageChange)="pageChange($event)" [pageSize]="pageSize" [(page)]="page"></ngb-pagination>
+      <div>
+        <label for="pageNumber" class="small">na stronie</label>
+        <select class="form-control form-control-sm" id="pageNumber" (change)="onChangePageSize($event)" [ngModel]="pageSize">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="25">25</option>
+        </select>
       </div>
-      <div class="row">
-        <div class="col-md-12">
-          <div class="form-group">
-            <label for="email">email</label>
-            <input class="form-control form-control-sm" type="email" id="email" formControlName="email">
-            <div class="alert alert-danger small" *ngIf="employeeForm.get('email').invalid">proszę podać prawidłowy adres email</div>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-12">
-          <div class="form-group">
-            <label for="phone">telefon</label>
-            <input class="form-control form-control-sm" type="text" id="phone" formControlName="phone">
-            <div class="alert alert-danger small" *ngIf="employeeForm.get('phone').invalid">proszę podać prawidłowy nr telefonu</div>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-12">
-          <button type="submit" class="btn btn-sm btn-primary float-right">{{isEditing ? 'zapisz' : 'dodaj'}}</button>
-        </div>
-      </div>
-    </form>
+    </div>
+    <div class="alert alert-primary" *ngIf="!employeesCount && !isFetchingEmployeesLoading">
+      lista pracowników jest pusta
+    </div>
 
-  </app-sidebar>
-
-  <h4>lista pracowników</h4>
-  <div class="d-flex justify-content-center" *ngIf="isLoading">
-    <div class="spinner-border text-primary" role="status"></div>
-  </div>
-  <div class="table-responsive" *ngIf="employeesCount && !isLoading">
-    <table class="table table-hover table-sm">
-      <thead>
-      <tr>
-        <th>imię</th>
-        <th>nazwisko</th>
-        <th>email</th>
-        <th>telefon</th>
-        <th>akcje</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr *ngFor="let employee of employees">
-        <td>{{employee.firstname}}</td>
-        <td>{{employee.surname}}</td>
-        <td>{{employee.email}}</td>
-        <td>{{employee.phone}}</td>
-        <td>
-          <div class="btn-group">
-            <button type="button" class="btn btn-sm btn-outline-primary" (click)="onStartManageEmployee(true, employee)">
-              edytuj
-            </button>
-            <button type="button" class="btn btn-sm btn-outline-danger" (click)="onDeleteEmployee(employee)">
-              usuń
-            </button>
-          </div>
-        </td>
-      </tr>
-      </tbody>
-    </table>
-  </div>
-  <ngb-pagination *ngIf="employeesCount && !isLoading" [collectionSize]="employeesCount" (pageChange)="pageChange($event)" pageSize="5" [(page)]="page"></ngb-pagination>
-  <div class="alert alert-primary" *ngIf="!employeesCount && !isLoading">
-    lista pracowników jest pusta
   </div>
 </div>

@@ -13,10 +13,14 @@ export class AppComponent implements OnInit {
   @ViewChild('manageEmployeeSidebar', {static: false}) manageEmployeeSidebar;
   employeeForm: FormGroup;
   isEditing = false;
-  editingId: number;
-  isLoading = false;
+  isFetchingEmployeesLoading = false;
+  isManagingEmployeeLoading = false;
   employeesCount: number;
   page = 1;
+  pageSize = 5;
+  isSubmitted = false;
+  private editingId: number;
+
   employees = [];
 
   constructor(
@@ -27,31 +31,36 @@ export class AppComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.getEmployees(5, 1);
+    this.getEmployees(this.pageSize, 1);
 
     this.employeeForm = this.formBuilder.group({
-      firstname: ['', Validators.required, {updateOn: 'submit'}],
-      surname: ['', Validators.required, {updateOn: 'submit'}],
-      email: ['', [Validators.required, Validators.email], {updateOn: 'submit'}],
-      phone: ['', [Validators.required, Validators.minLength(9), Validators.pattern(/^-?([0-9]\d*)?$/)], {updateOn: 'submit'}]
+      firstname: ['', Validators.required],
+      surname: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      phone: ['', [Validators.required, Validators.minLength(9), Validators.pattern(/^-?([0-9]\d*)?$/)]]
     });
   }
 
   pageChange(page) {
     this.page = page;
-    this.getEmployees(5, page);
+    this.getEmployees(this.pageSize, page);
+  }
+
+  onChangePageSize(event) {
+    this.pageSize = +event.target.value;
+    this.getEmployees(this.pageSize, 1);
   }
 
   getEmployees(pageSize?: number, page?: number) {
-    this.isLoading = true;
+    this.isFetchingEmployeesLoading = true;
     this.employeesService.getEmployees(pageSize, page)
       .subscribe(res => {
-        this.isLoading = false;
+        this.isFetchingEmployeesLoading = false;
         this.employees = res.employees;
         this.employeesCount = res.employeesCount;
       }, error => {
-        this.isLoading = false;
-        this.toastsService.show(false, 'wystąpił błąd, lista pracowników nie została pobrana', false);
+        this.isFetchingEmployeesLoading = false;
+        this.toastsService.show(false, 'wystąpił błąd, lista pracowników nie została pobrana', true);
       });
   }
 
@@ -65,6 +74,7 @@ export class AppComponent implements OnInit {
       .then(() => {
         this.isEditing = false;
         this.editingId = null;
+        this.isSubmitted = false;
         this.employeeForm.reset();
       });
   }
@@ -76,33 +86,39 @@ export class AppComponent implements OnInit {
     }).then(() => {
       this.employeesService.deleteEmployee(employee._id)
         .subscribe(res => {
-          this.toastsService.show(true, 'pracownik został usunięty pomyślnie', false);
-          this.getEmployees(5, 1);
+          this.toastsService.show(true, 'pracownik został usunięty pomyślnie', true);
+          this.getEmployees(this.pageSize, 1);
         }, error => {
-          this.toastsService.show(false, 'wystąpił błąd, pracownik nie został usunięty', false);
+          this.toastsService.show(false, 'wystąpił błąd, pracownik nie został usunięty', true);
         });
     }, () => {});
   }
 
   onManageEmployee() {
+    this.isSubmitted = true;
     if (this.employeeForm.valid) {
+      this.isManagingEmployeeLoading = true;
       if (this.isEditing) {
         this.employeesService.editEmployee(this.editingId, this.employeeForm.value)
           .subscribe(res => {
-            this.toastsService.show(true, 'dane pracownika zostały zaktualizowane pomyślnie', false);
-            this.getEmployees(5, 1);
+            this.toastsService.show(true, 'dane pracownika zostały zaktualizowane pomyślnie', true);
+            this.getEmployees(this.pageSize, 1);
             this.manageEmployeeSidebar.close();
+            this.isManagingEmployeeLoading = false;
           }, error => {
-            this.toastsService.show(false, 'wystąpił błąd, dane pracownika nie zostały zaktualizowane', false);
+            this.toastsService.show(false, 'wystąpił błąd, dane pracownika nie zostały zaktualizowane', true);
+            this.isManagingEmployeeLoading = false;
           });
       } else {
         this.employeesService.addEmployee(this.employeeForm.value)
           .subscribe(res => {
-            this.toastsService.show(true, 'pracownik został dodany pomyślnie', false);
-            this.getEmployees(5, 1);
+            this.toastsService.show(true, 'pracownik został dodany pomyślnie', true);
+            this.getEmployees(this.pageSize, 1);
             this.manageEmployeeSidebar.close();
+            this.isManagingEmployeeLoading = false;
           }, error => {
-            this.toastsService.show(false, 'wystąpił błąd, pracownik nie został dodany', false);
+            this.toastsService.show(false, 'wystąpił błąd, pracownik nie został dodany', true);
+            this.isManagingEmployeeLoading = false;
           });
       }
     }
